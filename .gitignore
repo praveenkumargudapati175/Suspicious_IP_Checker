@@ -1,0 +1,7 @@
+.env
+.streamlit/secrets.toml
+.venv/
+__pycache__/
+*.py[cod]
+data/events.db
+.pytest_cache/

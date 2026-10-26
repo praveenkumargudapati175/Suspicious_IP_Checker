@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="920" height="650" viewBox="0 0 920 650" role="img" aria-labelledby="title desc">
+  <title id="title">Suspicious IP Checker workflow</title>
+  <desc id="desc">Single or capped batch IP input, or five-second polling of authorized logs, feed IP validation, local and optional public-IP API checks, threshold evaluation, SQLite storage, dashboard display, and optional email alerts.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+      <path d="M0,0 L10,4 L0,8 z" fill="#334155"/>
+    </marker>
+    <style>
+      text { font-family: Segoe UI, Arial, sans-serif; fill: #0f172a; }
+      .box { fill: #eff6ff; stroke: #2563eb; stroke-width: 2; rx: 12; }
+      .decision { fill: #fef3c7; stroke: #d97706; stroke-width: 2; }
+      .store { fill: #ecfdf5; stroke: #059669; stroke-width: 2; }
+      .arrow { stroke: #334155; stroke-width: 2; fill: none; marker-end: url(#arrow); }
+    </style>
+  </defs>
+  <text x="460" y="34" text-anchor="middle" font-size="24" font-weight="700">Suspicious IP Checker</text>
+  <rect class="box" x="320" y="58" width="280" height="58"/>
+  <text x="460" y="94" text-anchor="middle" font-size="17">IP / batch input or authorized log polling</text>
+  <path class="arrow" d="M460 116 V145"/>
+  <rect class="box" x="345" y="146" width="230" height="58"/>
+  <text x="460" y="182" text-anchor="middle" font-size="17">Validate and normalize IP</text>
+  <path class="arrow" d="M460 204 V234"/>
+  <rect class="store" x="60" y="236" width="270" height="68"/>
+  <text x="195" y="264" text-anchor="middle" font-size="16">Local threat CSV</text>
+  <text x="195" y="286" text-anchor="middle" font-size="13">Match indicator if present</text>
+  <rect class="box" x="590" y="236" width="270" height="68"/>
+  <text x="725" y="264" text-anchor="middle" font-size="16">Optional AbuseIPDB lookup</text>
+  <text x="725" y="286" text-anchor="middle" font-size="13">Global IP + configured API key</text>
+  <path class="arrow" d="M460 234 H195 V236"/>
+  <path class="arrow" d="M460 234 H725 V236"/>
+  <path class="arrow" d="M195 304 V342 H460"/>
+  <path class="arrow" d="M725 304 V342 H460"/>
+  <polygon class="decision" points="460,340 560,395 460,450 360,395"/>
+  <text x="460" y="389" text-anchor="middle" font-size="15">Local match or</text>
+  <text x="460" y="410" text-anchor="middle" font-size="15">score >= threshold?</text>
+  <path class="arrow" d="M460 450 V476"/>
+  <rect class="store" x="325" y="478" width="270" height="58"/>
+  <text x="460" y="514" text-anchor="middle" font-size="17">Save event to SQLite</text>
+  <path class="arrow" d="M460 536 V563 H260"/>
+  <path class="arrow" d="M460 563 H660"/>
+  <rect class="box" x="100" y="565" width="230" height="58"/>
+  <text x="215" y="600" text-anchor="middle" font-size="16">Dashboard + filtered CSV history</text>
+  <rect class="box" x="550" y="565" width="230" height="58"/>
+  <text x="665" y="590" text-anchor="middle" font-size="16">Optional email alert</text>
+  <text x="665" y="610" text-anchor="middle" font-size="13">Suspicious + SMTP configured</text>
+</svg>
