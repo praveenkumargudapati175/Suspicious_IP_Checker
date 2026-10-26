@@ -51,12 +51,19 @@ st.markdown(
         border: 0; border-radius: 10px; min-height: 2.8rem;
     }
     div.stButton > button { border-radius: 10px; }
-    [data-testid="stTabs"] [role="tab"] { font-weight: 650; }
+    [data-testid="stSidebar"] [role="radiogroup"] { gap: .3rem; }
+    [data-testid="stSidebar"] [role="radiogroup"] label {
+        padding: .48rem .65rem; border-radius: 10px; transition: background .15s ease;
+    }
+    [data-testid="stSidebar"] [role="radiogroup"] label:hover { background: #1b2a43; }
+    [data-testid="stSidebar"] [role="radiogroup"] label:has(input:checked) {
+        background: #20395d; border: 1px solid #315785;
+    }
     .signal-hero {
         background: radial-gradient(ellipse at 85% 15%,rgba(53,124,247,.48),transparent 34%),
                     linear-gradient(118deg,#101b30 0%,#18335c 62%,#145d77 100%);
         color: #f7faff; border-radius: 24px; padding: 2rem 2.15rem;
-        margin: .25rem 0 1.35rem; box-shadow: 0 18px 46px rgba(18,40,78,.17);
+        margin: .25rem 0 1.65rem; box-shadow: 0 18px 46px rgba(18,40,78,.17);
     }
     .signal-hero h1 { color: white; font-size: clamp(2rem,4vw,3rem); margin: .4rem 0 .45rem; }
     .signal-hero p { color: #d6e4f7; font-size: 1.02rem; max-width: 760px; }
@@ -72,6 +79,10 @@ st.markdown(
     }
     .signal-card h3 { margin: .15rem 0 .4rem; color: #17243a; }
     .signal-card p { margin: 0; color: #60718a; }
+    .signal-section-kicker {
+        color: #4774ac; font-size: .73rem; font-weight: 750;
+        letter-spacing: .14em; text-transform: uppercase; margin-bottom: .2rem;
+    }
     </style>
     """,
     unsafe_allow_html=True,
@@ -135,6 +146,10 @@ def apply_ip_example() -> None:
     st.session_state["ip_address_input"] = IP_EXAMPLES[
         st.session_state["ip_example"]
     ]
+
+
+def navigate_to(page: str) -> None:
+    st.session_state["active_page"] = page
 
 
 def google_auth_status() -> tuple[str, str | None]:
@@ -226,6 +241,30 @@ with st.sidebar:
         'IP intelligence workspace</div></div>',
         unsafe_allow_html=True,
     )
+    st.caption("NAVIGATION")
+    current_page = st.radio(
+        "Workspace",
+        [
+            "Overview",
+            "IP reputation",
+            "Bulk investigation",
+            "Live log monitor",
+            "Threat intelligence",
+            "Activity",
+            "Settings & deployment",
+        ],
+        format_func=lambda page: {
+            "Overview": "◈  Overview",
+            "IP reputation": "⌕  IP reputation",
+            "Bulk investigation": "▦  Bulk investigation",
+            "Live log monitor": "◉  Live log monitor",
+            "Threat intelligence": "◇  Threat intelligence",
+            "Activity": "↗  Activity",
+            "Settings & deployment": "⚙  Settings & deployment",
+        }[page],
+        key="active_page",
+        label_visibility="collapsed",
+    )
     st.markdown("---")
     st.caption("SESSION")
     if signed_in_email:
@@ -249,13 +288,52 @@ suspicious_count = sum(event["status"] == "SUSPICIOUS" for event in events)
 api_count = sum(event["api_status"] == "available" for event in events)
 status_counts = Counter(event["status"] for event in events)
 
+page_content = {
+    "Overview": (
+        "Threat intelligence · log monitoring · response",
+        "See the signal.<br>Understand the risk.",
+        "Your IP security workspace for reputation checks, authorized server-log "
+        "monitoring, and reviewable investigation history.",
+    ),
+    "IP reputation": (
+        "INVESTIGATIONS · IP REPUTATION",
+        "Know what an address<br>is telling you.",
+        "Check an IP against local indicators and, when configured, live reputation data.",
+    ),
+    "Bulk investigation": (
+        "INVESTIGATIONS · BATCH CHECKS",
+        "Review addresses<br>at your pace.",
+        "Validate and investigate a small, deduplicated batch with transparent privacy controls.",
+    ),
+    "Live log monitor": (
+        "MONITORING · AUTHORIZED LOGS",
+        "Watch your logs.<br>Follow the signal.",
+        "Scan new entries from a server log you own or are authorized to monitor.",
+    ),
+    "Threat intelligence": (
+        "INTELLIGENCE · LOCAL INDICATORS",
+        "Know what powers<br>your findings.",
+        "Search and review the local indicator list used by every check.",
+    ),
+    "Activity": (
+        "INVESTIGATIONS · EVENT HISTORY",
+        "Every check.<br>One clear timeline.",
+        "Filter recent investigation results and export the evidence you need.",
+    ),
+    "Settings & deployment": (
+        "WORKSPACE · CONFIGURATION",
+        "Your workspace,<br>your controls.",
+        "Review connected services, deployment requirements, and data privacy.",
+    ),
+}
+page_eyebrow, page_title, page_description = page_content[current_page]
+
 st.markdown(
-    """
+    f"""
     <section class="signal-hero">
-      <div class="signal-eyebrow">Threat intelligence · log monitoring · response</div>
-      <h1>See the signal.<br>Understand the risk.</h1>
-      <p>One workspace for IP reputation, authorized server-log monitoring, and
-      investigation history — with transparent evidence and no automatic blocking.</p>
+      <div class="signal-eyebrow">{page_eyebrow}</div>
+      <h1>{page_title}</h1>
+      <p>{page_description}</p>
     </section>
     """,
     unsafe_allow_html=True,
@@ -272,19 +350,7 @@ if not get_setting("ABUSEIPDB_API_KEY"):
         "lookups for globally routable IPs."
     )
 
-overview_tab, check_tab, bulk_tab, monitor_tab, intel_tab, history_tab, settings_tab = st.tabs(
-    [
-        "Overview",
-        "IP reputation",
-        "Bulk investigation",
-        "Live log monitor",
-        "Threat intelligence",
-        "Activity",
-        "Settings & deployment",
-    ]
-)
-
-with overview_tab:
+if current_page == "Overview":
     st.subheader("Security overview")
     metric_a, metric_b, metric_c, metric_d = st.columns(4)
     metric_a.metric("Checks recorded", len(events))
@@ -345,8 +411,33 @@ with overview_tab:
             '<p>Open an event for reputation details, then export the history as CSV.</p></div>',
             unsafe_allow_html=True,
         )
+    action_a, action_b, action_c = st.columns(3)
+    with action_a:
+        st.button(
+            "Open IP reputation",
+            key="overview_open_reputation",
+            on_click=navigate_to,
+            args=("IP reputation",),
+            use_container_width=True,
+        )
+    with action_b:
+        st.button(
+            "Open log monitor",
+            key="overview_open_monitor",
+            on_click=navigate_to,
+            args=("Live log monitor",),
+            use_container_width=True,
+        )
+    with action_c:
+        st.button(
+            "Review activity",
+            key="overview_open_activity",
+            on_click=navigate_to,
+            args=("Activity",),
+            use_container_width=True,
+        )
 
-with check_tab:
+if current_page == "IP reputation":
     st.subheader("IP reputation lookup")
     st.caption(
         "Choose a safe demo or a public DNS example. Public example checks are "
@@ -386,7 +477,7 @@ with check_tab:
         except ValueError as error:
             st.error(f"Enter a valid IP address: {error}")
 
-with bulk_tab:
+if current_page == "Bulk investigation":
     st.subheader("Bulk IP investigation")
     st.caption(
         "Check up to 25 unique addresses at once. Addresses are checked against "
@@ -445,7 +536,7 @@ with bulk_tab:
             mime="text/csv",
         )
 
-with monitor_tab:
+if current_page == "Live log monitor":
     st.subheader("Authorized server-log monitoring")
     st.markdown(
         '<div class="signal-note">Choose a log file you own or are authorized '
@@ -470,7 +561,7 @@ with monitor_tab:
         "locally; globally routable addresses may be sent to AbuseIPDB if configured."
     )
 
-with intel_tab:
+if current_page == "Threat intelligence":
     st.subheader("Local threat intelligence")
     st.caption(
         "Review the local indicators used in every investigation. The bundled "
@@ -506,7 +597,7 @@ with intel_tab:
         unsafe_allow_html=True,
     )
 
-with history_tab:
+if current_page == "Activity":
     st.subheader("Investigation history")
     st.caption("Recent checks are stored in the local SQLite event database.")
     if events:
@@ -540,7 +631,7 @@ with history_tab:
     else:
         st.info("No events recorded yet. Checks are added here automatically.")
 
-with settings_tab:
+if current_page == "Settings & deployment":
     st.subheader("Workspace settings")
     st.markdown("#### Connected services")
     st.write(
@@ -557,15 +648,15 @@ with settings_tab:
     )
     st.markdown("#### Before deploying publicly")
     st.markdown(
-        "- Push the project to a private or public GitHub repository you control.\n"
-        "- Deploy `app.py` through Streamlit Community Cloud.\n"
+        "- Connect this project's GitHub repository to Streamlit Community Cloud.\n"
+        "- Select the repository root `app.py` as the app entry point.\n"
         "- Configure Google OIDC and an explicit `allowed_emails` list in the app's secrets.\n"
         "- Keep the environment set to `production`; never deploy with development access enabled.\n"
         "- Add persistent database storage before relying on hosted event history."
     )
     st.info(
-        "This workspace is not connected to a GitHub repository yet, so a hosted "
-        "deployment must be created from your GitHub account."
+        "The project is available in its GitHub repository. The hosted website "
+        "still needs to be created in Streamlit Community Cloud."
     )
     st.markdown("#### Data and privacy")
     st.write(

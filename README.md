@@ -80,6 +80,12 @@ and a check is flagged suspicious. Delivery failures appear in the dashboard.
 
 ## Using the dashboard
 
+Use the left sidebar to move between separate pages: **Overview**, **IP
+reputation**, **Bulk investigation**, **Live log monitor**, **Threat
+intelligence**, **Activity**, and **Settings & deployment**. Selecting a page
+replaces the main workspace content; it does not stack every feature on one
+screen.
+
 ### IP Reputation Check
 
 Open **IP reputation**, choose an example, and select **Check reputation**:
