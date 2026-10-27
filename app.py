@@ -138,7 +138,7 @@ def show_result(result: CheckResult) -> None:
     st.dataframe(
         [{"Field": key, "Result": value} for key, value in details.items()],
         hide_index=True,
-        width="stretch",
+        use_container_width=True,
     )
 
 
@@ -230,6 +230,7 @@ def show_log_monitor(log_path_text: str, monitor_enabled: bool) -> None:
 
 
 auth_mode, signed_in_email = google_auth_status()
+api_configured = bool(get_setting("ABUSEIPDB_API_KEY"))
 
 with st.sidebar:
     st.markdown(
@@ -277,7 +278,7 @@ with st.sidebar:
     st.write("Local threat list")
     st.write(
         "AbuseIPDB: connected"
-        if get_setting("ABUSEIPDB_API_KEY")
+        if api_configured
         else "AbuseIPDB: not configured"
     )
     st.markdown("---")
@@ -341,10 +342,10 @@ st.markdown(
 
 if auth_mode == "development":
     st.warning(
-        "Development access only. Google sign-in is not configured. "
-        "Configure OIDC and the authorized-email allowlist before deployment."
+        "Running locally without Google sign-in, as expected in development. "
+        "Configure OIDC and an authorized-email allowlist before public deployment."
     )
-if not get_setting("ABUSEIPDB_API_KEY"):
+if not api_configured:
     st.info(
         "Local matching is ready. Add your own AbuseIPDB API key to enable live "
         "lookups for globally routable IPs."
@@ -372,7 +373,7 @@ if current_page == "Overview":
             st.dataframe(
                 [{key: event[key] for key in recent_columns} for event in events[:8]],
                 hide_index=True,
-                width="stretch",
+                use_container_width=True,
             )
         else:
             st.markdown(
@@ -489,7 +490,6 @@ if current_page == "Bulk investigation":
         height=150,
         key="bulk_ip_input",
     )
-    api_configured = bool(get_setting("ABUSEIPDB_API_KEY"))
     allow_bulk_external = st.checkbox(
         "I authorize sending globally routable addresses to AbuseIPDB for live reputation checks",
         disabled=not api_configured,
@@ -528,7 +528,7 @@ if current_page == "Bulk investigation":
 
     batch_results = st.session_state.get("bulk_results", [])
     if batch_results:
-        st.dataframe(batch_results, hide_index=True, width="stretch")
+        st.dataframe(batch_results, hide_index=True, use_container_width=True)
         st.download_button(
             "Download batch results",
             data=export_events_csv(batch_results),
@@ -587,7 +587,7 @@ if current_page == "Threat intelligence":
         or indicator_query in details["label"].casefold()
     ]
     if indicator_rows:
-        st.dataframe(indicator_rows, hide_index=True, width="stretch")
+        st.dataframe(indicator_rows, hide_index=True, use_container_width=True)
     else:
         st.info("No indicators match that search.")
     st.markdown(
@@ -620,7 +620,7 @@ if current_page == "Activity":
             and history_query in event["ip_address"].casefold()
         ]
         st.caption(f"Showing {len(filtered_events)} of {len(events)} recent events.")
-        st.dataframe(filtered_events, width="stretch", hide_index=True)
+        st.dataframe(filtered_events, use_container_width=True, hide_index=True)
         st.download_button(
             "Download filtered history as CSV",
             data=export_events_csv(filtered_events),
