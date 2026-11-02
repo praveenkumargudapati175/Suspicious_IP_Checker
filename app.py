@@ -87,15 +87,27 @@ st.markdown(
     """,
     unsafe_allow_html=True,
 )
-
-
 def evaluate_ip(raw_ip: str, *, allow_external: bool = True) -> CheckResult:
     address = ipaddress.ip_address(raw_ip.strip())
+
     return check_ip(
         str(address),
         indicators=load_threat_ips(THREAT_LIST),
-        api_key=get_setting("ABUSEIPDB_API_KEY") if allow_external else "",
+        api_key=(
+            get_setting("ABUSEIPDB_API_KEY")
+            if allow_external else ""
+        ),
+        virus_total_api_key=(
+            get_setting("VIRUSTOTAL_API_KEY")
+            if allow_external else ""
+        ),
+        otx_api_key=(
+            get_setting("ALIENVAULT_OTX_API_KEY")
+            if allow_external else ""
+        ),
     )
+
+
 
 
 def save_and_alert(result: CheckResult) -> None:
